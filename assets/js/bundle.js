@@ -147,7 +147,6 @@
               location.href='#login';
               app.appendChild(Login);
           } else {
-              console.log('entrou aqui');
               location.href='#users';
               const users = getDevelopersList(atob(token[1]));
               renderPageUsers(users);
