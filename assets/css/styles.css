@@ -30,10 +30,6 @@ body {
     background-attachment: fixed;
 }
 
-/**
-* YOUR CODE HERE
-*/
-
 #app  {
     width: 100%;
     display: flex;
@@ -88,6 +84,65 @@ body {
     color: #F4EBE1;
     font-size: 16px;
 }
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-gap: 10px;
+    margin-top: 30px;
+}
+
+
+.user-content {
+    display: flex;
+    max-width: 140px;
+    align-items: center;
+    background: #FFF;
+    padding: 08px;
+    border-radius: 4px;
+}
+
+.user-content h3 {
+     color: #ACACAC;
+     font-size: 12px;
+     margin-left: 10px;
+}
+
+.avatar-url {
+    max-width: 23px;
+    border-radius: 300px;
+    filter: gray;
+    filter: grayscale(100%);
+    transition: all .2s ease-in-out;
+}
+
+.avatar-url:hover {
+    transform: scale(2.3);
+    filter: none;
+}
+
+#available {
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: rgba(0, 148, 50,1.0);
+    border: none;
+    border-radius: 4px;
+    color: #F4EBE1;
+    font-size: 16px;
+    transition: ease 0.2s;
+}
+
+#available:hover {
+     background-color: rgba(0, 148, 50, 0.8);
+}
+
+#loading {
+    margin-top: 25px;
+    font-size: 25px;
+    color: rgba(0, 148, 50,1.0)
+}
+
+ 
 
 
 

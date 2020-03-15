@@ -1,9 +1,115 @@
 (() => {
-     const selector = (selector) =>  document.querySelector(selector);
-     /* trecho omitido */
-     const create = element => document.createElement(element); /* trecho omitido */
 
-    const app = selector('#app'); 
+    function handleLoading(loading = true) {
+        if(loading === true) {
+            const loadingEl = create('h2');
+            loadingEl.appendChild(document.createTextNode('Loading...'));
+            loadingEl.setAttribute('id', 'loading');
+
+            app.appendChild(loadingEl);
+
+            Login.style.display = 'none';
+        } else {
+            document.getElementById('loading').remove();
+        }
+    }
+
+    async function fakeAuthenticate(email, password) {
+
+        const response = await fetch('http://www.mocky.io/v2/5dba690e3000008c00028eb6');
+        const data = await response.json();
+
+       
+        const fakeJwtToken = `${btoa(email+password)}.${btoa(data.url)}.${(new Date()).getTime()+300000}`;
+        localStorage.setItem(TOKEN_KEY, fakeJwtToken);
+
+        return data;
+    }
+
+     function getDevelopersList(url) {
+        
+        handleLoading();
+
+        setTimeout(async () => {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+    
+            data.map((att)=>  {
+                userlist.push({
+                    id: att.id,
+                    avatar_url: att.avatar_url,
+                    login: att.login
+                })
+            })
+    
+            renderPageUsers();
+    
+            handleLoading(loading = false);
+    
+            } catch (error) {
+                return;
+            }
+
+        }, 3000);
+        
+    }
+
+    function renderPageUsers() {
+
+        app.classList.add('logged');
+
+        const Ul = create('ul');
+
+        Ul.classList.add('container');
+
+        Ul.innerHTML = '';  
+
+        userlist.forEach(user => {             
+            const listItemEL = document.createElement('li');
+            listItemEL.classList.add('user-content');
+            
+            const userLogin = create('h3');
+            userLogin.appendChild(document.createTextNode(user.login));
+            
+            const userAvatar = create('img');
+            userAvatar.setAttribute('src', user.avatar_url);
+            userAvatar.classList.add('avatar-url');
+            
+            listItemEL.appendChild(userAvatar);
+            listItemEL.appendChild(userLogin);
+            
+            Ul.appendChild(listItemEL);
+        })
+
+        app.appendChild(Ul)
+    }
+
+    (async function(){
+         const rawToken = localStorage.getItem(TOKEN_KEY);
+         const token = rawToken ? rawToken.split('.') : null
+        
+          if (!token || token[2] < (new Date()).getTime()) {
+              localStorage.removeItem(TOKEN_KEY);
+              location.href='#login';
+              app.appendChild(Login);
+          } else {
+              console.log('entrou aqui');
+              location.href='#users';
+              const users = getDevelopersList(atob(token[1]));
+              renderPageUsers(users);
+          }
+    })()
+
+     const selector = (selector) =>  document.querySelector(selector);
+     
+     const create = element => document.createElement(element);
+
+     const TOKEN_KEY = '@rd-frontend-challenge-TOKEN';
+
+     const userlist = [];
+
+     const app = selector('#app'); 
 
     const Login = create('div');
     Login.classList.add('login');
@@ -14,7 +120,6 @@
 
     const Form = create('form');
 
-    
     Form.onsubmit = async e => {
         e.preventDefault();
 
@@ -24,18 +129,21 @@
 
         location.href='#users';
         
-       await getDevelopersList(url);
-    };
+        getDevelopersList(url);
+    }; 
 
     Form.oninput = e => {
         const [email, password, button] = e.target.parentElement.children;
-        
-        (!email.validity.valid || !email.value || password.value.length <= 5) 
-            ? button.setAttribute('disabled','disabled')
-            : button.removeAttribute('disabled');
-    };
 
-    
+           if(!email.validity.valid || !email.value || password.value.length <= 5) {
+                 button.setAttribute('disabled','disabled');
+                 button.removeAttribute('id', 'available');
+                 button.setAttribute('id', 'submit');
+           } else {
+              button.removeAttribute('disabled');
+              button.setAttribute('id', 'available');
+           }
+    };    
     
     Form.innerHTML = 
        `<input type="email" class="signin-input" placeholder="Entre com seu email"/>
@@ -46,75 +154,5 @@
     app.appendChild(Logo);
     app.appendChild(Login);
     Login.appendChild(Form);
-    
-    async function fakeAuthenticate(email, password) {
 
-        const response = await fetch('http://www.mocky.io/v2/5dba690e3000008c00028eb6');
-        const data = await response.json();
-
-         const fakeJwtToken = `${btoa(email+password)}.${btoa(data.url)}.${(new Date()).getTime()+300000}`;
-        return data;
-    }
-
-    const userlist = []
-
-    async function getDevelopersList(url) {
-
-        const response = await fetch(url);
-        const data = await response.json();
-
-        data.map((att)=>  {
-            userlist.push({
-                id: att.id,
-                avatar_url: att.avatar_url,
-                login: att.login
-            })
-        })
-
-        renderPageUsers();
-    }
-
-    function renderPageUsers() {
-
-        app.classList.add('logged');
-
-        Login.style.display = 'none';
-
-        const Ul = create('ul');
-
-        Ul.classList.add('container');
-
-        Ul.innerHTML = '';  
-
-        userlist.forEach(user => {             
-             let userLogin = create('h3');
-             userLogin.appendChild(document.createTextNode(user.login));
-
-             let userAvatar = create('img');
-             userAvatar.setAttribute('src', user.avatar_url);
-             user.Avatar.classList.add('avatar-url');
-
-            // let listItemEL = document.createElement('li');
-            // listItemEL.appendChild(userLogin);
-            
-            // Ul.appendChild(listItemEL);
-        })
-        app.appendChild(Ul)
-    }
-
-    // init
-    (async function(){
-       // const rawToken = /* trecho omitido */
-        //const token = rawToken ? rawToken.split('.') : null
-        
-        // if (!token || token[2] < (new Date()).getTime()) {
-        //     localStorage.removeItem('token');
-        //     location.href='#login';
-        //     app.appendChild(Login);
-        // } else {
-        //     location.href='#users';
-        //     const users = await getDevelopersList(atob(token[1]));
-        //     renderPageUsers(users);
-        // }
-    })()
 })()
