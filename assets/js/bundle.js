@@ -1,4 +1,69 @@
 (() => {
+    const selector = (selector) =>  document.querySelector(selector);
+     
+    const create = element => document.createElement(element);
+
+    const app = selector('#app'); 
+
+    const Login = create('div');
+    Login.classList.add('login');
+
+    const Logo = create('img');
+    Logo.src = './assets/images/logo.svg';
+    Logo.classList.add('logo');
+
+    const Form = create('form');
+
+    Form.innerHTML = 
+       `<input type="email" class="signin-input" placeholder="Entre com seu email"/>
+        <input type="password" class="signin-input" placeholder="Digite sua senha supersecreta"/>
+        <button type="submit" id="submit">Entrar</button>         
+       `
+       
+    app.appendChild(Logo);
+    app.appendChild(Login);
+    Login.appendChild(Form);
+
+    
+    Form.onsubmit = async e => {
+        e.preventDefault();
+
+        const [email, password] = e.target.elements;
+
+        const {url} = await fakeAuthenticate(email.value, password.value);
+
+        location.href='#users';
+        
+        getDevelopersList(url);
+    }; 
+
+    Form.oninput = e => {
+        const [email, password, button] = e.target.parentElement.children;
+
+           if(!email.validity.valid || !email.value || password.value.length <= 5) {
+                 button.setAttribute('disabled','disabled');
+                 button.removeAttribute('id', 'available');
+                 button.setAttribute('id', 'submit');
+           } else {
+              button.removeAttribute('disabled');
+              button.setAttribute('id', 'available');
+           }
+    };
+
+    const TOKEN_KEY = '@rd-frontend-challenge-TOKEN';
+
+    const userlist = [];
+    
+    async function fakeAuthenticate(email, password) {
+
+        const response = await fetch('http://www.mocky.io/v2/5dba690e3000008c00028eb6');
+        const data = await response.json();
+       
+        const fakeJwtToken = `${btoa(email+password)}.${btoa(data.url)}.${(new Date()).getTime()+300000}`;
+        localStorage.setItem(TOKEN_KEY, fakeJwtToken);
+
+        return data;
+    }
 
     function handleLoading(loading = true) {
         if(loading === true) {
@@ -12,18 +77,6 @@
         } else {
             document.getElementById('loading').remove();
         }
-    }
-
-    async function fakeAuthenticate(email, password) {
-
-        const response = await fetch('http://www.mocky.io/v2/5dba690e3000008c00028eb6');
-        const data = await response.json();
-
-       
-        const fakeJwtToken = `${btoa(email+password)}.${btoa(data.url)}.${(new Date()).getTime()+300000}`;
-        localStorage.setItem(TOKEN_KEY, fakeJwtToken);
-
-        return data;
     }
 
      function getDevelopersList(url) {
@@ -48,7 +101,7 @@
             handleLoading(loading = false);
     
             } catch (error) {
-                return;
+                alert('Algo deu errado no carregamento :(');
             }
 
         }, 3000);
@@ -66,7 +119,7 @@
         Ul.innerHTML = '';  
 
         userlist.forEach(user => {             
-            const listItemEL = document.createElement('li');
+            const listItemEL = create('li');
             listItemEL.classList.add('user-content');
             
             const userLogin = create('h3');
@@ -100,59 +153,4 @@
               renderPageUsers(users);
           }
     })()
-
-     const selector = (selector) =>  document.querySelector(selector);
-     
-     const create = element => document.createElement(element);
-
-     const TOKEN_KEY = '@rd-frontend-challenge-TOKEN';
-
-     const userlist = [];
-
-     const app = selector('#app'); 
-
-    const Login = create('div');
-    Login.classList.add('login');
-
-    const Logo = create('img');
-    Logo.src = './assets/images/logo.svg';
-    Logo.classList.add('logo');
-
-    const Form = create('form');
-
-    Form.onsubmit = async e => {
-        e.preventDefault();
-
-        const [email, password] = e.target.elements;
-
-        const {url} = await fakeAuthenticate(email.value, password.value);
-
-        location.href='#users';
-        
-        getDevelopersList(url);
-    }; 
-
-    Form.oninput = e => {
-        const [email, password, button] = e.target.parentElement.children;
-
-           if(!email.validity.valid || !email.value || password.value.length <= 5) {
-                 button.setAttribute('disabled','disabled');
-                 button.removeAttribute('id', 'available');
-                 button.setAttribute('id', 'submit');
-           } else {
-              button.removeAttribute('disabled');
-              button.setAttribute('id', 'available');
-           }
-    };    
-    
-    Form.innerHTML = 
-       `<input type="email" class="signin-input" placeholder="Entre com seu email"/>
-        <input type="password" class="signin-input" placeholder="Digite sua senha supersecreta"/>
-        <button type="submit" id="submit">Entrar</button>         
-       `
-       
-    app.appendChild(Logo);
-    app.appendChild(Login);
-    Login.appendChild(Form);
-
 })()
